@@ -1,0 +1,36 @@
+name: "♻️ 리팩토링"
+description: 기능 변경 없이 코드 구조를 개선합니다
+labels: ["refactor"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 대상 코드
+      description: 어떤 파일이나 모듈을 개선할 예정인가요?
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 현재 문제점
+      description: 왜 개선이 필요한가요?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 개선 방향
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: 확인 사항
+      options:
+        - label: 외부 동작(API, 응답 포맷 등)을 변경하지 않습니다
+          required: true
+        - label: 기존 테스트가 모두 통과합니다
+          required: true
