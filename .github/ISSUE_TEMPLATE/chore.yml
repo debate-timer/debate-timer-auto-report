@@ -1,0 +1,24 @@
+name: "🔧 유지보수"
+description: 의존성 업데이트, 설정 변경, 도구 관련 작업입니다
+labels: ["chore"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 작업 내용
+      description: 어떤 유지보수 작업이 필요한가요?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: 이유 / 배경
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 영향 범위 (선택)
+      description: 이 작업이 다른 기능에 영향을 줄 수 있나요?

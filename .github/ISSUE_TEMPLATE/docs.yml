@@ -1,0 +1,25 @@
+name: "📝 문서"
+description: 문서 추가 또는 수정을 제안합니다
+labels: ["docs"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 대상 문서
+      description: 어떤 문서를 추가하거나 수정해야 하나요?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: 수정 이유
+      description: 왜 변경이 필요한가요? (누락, 오류, 구버전 등)
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 변경 내용 (선택)
+      description: 구체적인 변경 내용이 있다면 적어주세요

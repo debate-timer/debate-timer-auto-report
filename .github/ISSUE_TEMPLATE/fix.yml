@@ -1,0 +1,51 @@
+name: "🐛 버그 리포트"
+description: 버그를 제보합니다
+labels: ["fix"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 버그 설명
+      description: 어떤 문제가 발생했나요?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 방법
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 예상 동작
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 환경
+      placeholder: |
+        - Node.js 버전:
+        - OS:
+        - 기타:
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 로그 / 스크린샷 (선택)
+      description: 관련 오류 로그나 스크린샷을 첨부해주세요
