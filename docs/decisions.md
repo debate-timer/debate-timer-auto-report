@@ -28,9 +28,14 @@
 - 전체 구현 순서와 Phase 정의는 [implementation-plan.md](./implementation-plan.md)를 기준으로 본다.
 - AI 선택 근거는 [ai-framework-selection.md](./ai-framework-selection.md)를 기준으로 본다.
 
+## 확정된 추가 결정
+
+- **Amplitude-first 전략**: GA4 연동 없음, Sentry는 2차, AI는 placeholder만. [ADR 001](./adr/001-amplitude-first.md) 참조.
+- **환경변수 구조**: 루트 `.env.example` 기준으로 관리. 채널별 Discord Webhook 분리.
+- **AI**: 1차에서 비활성화(`AI_ENABLED=false`). 2차에서 Gemini API 무료 티어로 시작.
+
 ## 아직 확정이 필요한 항목
 
-- ADR 1건 구체화
-- `.env.example` 초안
-- 필수 환경변수 키 목록
-- Phase 0 종료 시점 판단
+- Phase 0 → Phase 1 전환 시점 판단 (현재 Phase 0 완료 기준 충족됨)
+- 지표별 경고 임계치 초기값 (Phase 2 착수 전 확정 필요)
+- 발송 주기·시각 최종 확인 (기본안: 주간 월요일 09:00, 월간 1일 09:00 KST)
