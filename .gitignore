@@ -8,6 +8,8 @@ coverage/
 *.log
 
 # Local tooling
+.agent/
 .agents/
 .claude/
+.codex/
 skills-lock.json
