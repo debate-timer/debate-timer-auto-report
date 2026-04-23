@@ -12,4 +12,5 @@ coverage/
 .agents/
 .claude/
 .codex/
+.specify/
 skills-lock.json
