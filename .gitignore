@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.tmp-bootstrap/
+.env
+.env.*
+!.env.example
+*.log
+
+# Local tooling
+.agents/
+.claude/
+skills-lock.json
