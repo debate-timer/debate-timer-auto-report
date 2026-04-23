@@ -1,6 +1,9 @@
+<!-- PR 제목 형식: [TYPE] 작업 제목 -->
+<!-- 예시: [FEAT] Amplitude Adapter 구현, [FIX] Discord 전송 재시도 오류 수정 -->
+<!-- TYPE: FEAT · FIX · HOTFIX · REFACTOR · DOCS · TEST · CHORE · CI -->
+
 ## 관련 이슈
 
-<!-- 연결된 이슈 번호를 적어주세요 -->
 closes #
 
 ## 개요
@@ -27,6 +30,7 @@ closes #
 
 ## 체크리스트
 
+- [ ] PR 제목이 `[TYPE] 작업 제목` 형식인가?
 - [ ] 브랜치 이름이 `{type}/#{issue_number}` 형식인가?
 - [ ] 대상 브랜치가 올바른가? (`hotfix` 제외 → `develop`, `hotfix` → `main` + `develop`)
 - [ ] 테스트를 추가하거나 기존 테스트가 통과하는가?

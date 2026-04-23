@@ -163,6 +163,20 @@ AI 계층 (bounded tool calling, Phase 8, AI_ENABLED=false)
 
 타입 목록: `feat` · `fix` · `hotfix` · `refactor` · `docs` · `test` · `chore` · `ci`
 
+### PR 제목
+
+```text
+[TYPE] 작업 제목
+```
+
+예시: `[FEAT] Amplitude Adapter 구현`, `[FIX] Discord 전송 재시도 오류 수정`
+
+타입 대문자 매핑: `feat`→`FEAT` · `fix`→`FIX` · `hotfix`→`HOTFIX` · `refactor`→`REFACTOR` · `docs`→`DOCS` · `test`→`TEST` · `chore`→`CHORE` · `ci`→`CI`
+
+### 이슈 연결
+
+PR 본문 **관련 이슈** 섹션에 `closes #이슈번호` 를 기입하면 PR 머지 시 해당 이슈가 자동으로 닫힌다.
+
 ### 이슈 구조
 
 - **메인 이슈**: Phase 단위 또는 대형 기능 단위로 생성
