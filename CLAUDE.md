@@ -151,6 +151,30 @@ AI 계층 (bounded tool calling, Phase 8, AI_ENABLED=false)
 
 환경변수 파일은 리포지토리에 커밋 금지. 운영 서버에서는 컨테이너 외부 파일을 볼륨 마운트로 주입.
 
+## 브랜치 및 이슈 규칙
+
+### 브랜치 네이밍
+
+```text
+{type}/#{issue_number}
+```
+
+예시: `feat/#6`, `fix/#12`, `docs/#3`
+
+타입 목록: `feat` · `fix` · `hotfix` · `refactor` · `docs` · `test` · `chore` · `ci`
+
+### 이슈 구조
+
+- **메인 이슈**: Phase 단위 또는 대형 기능 단위로 생성
+- **서브 이슈**: 메인 이슈 하위 작업 단위로 생성, 본문에 `상위 이슈: #{번호}` 명시
+- 브랜치는 서브 이슈 기준으로 생성 (`feat/#{서브이슈번호}`)
+- PR은 항상 서브 이슈 번호를 참조하고, 본문에 설계 판단 이유를 기록
+
+### 머지 대상
+
+- 일반 브랜치 → `develop`
+- `hotfix` 브랜치 → `main` + `develop`
+
 ## 현재 구현 단계
 
 Phase 0 완료, Phase 1 (Walking Skeleton) 착수 예정.
