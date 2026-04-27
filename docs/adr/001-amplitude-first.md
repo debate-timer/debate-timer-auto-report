@@ -9,7 +9,7 @@ Accepted (2026-04-23)
 이 시스템은 GA4, Amplitude, Sentry 세 가지 외부 데이터 원천을 다룬다.
 
 - **GA4**: 오래된 원천이며 팀이 Amplitude로 전환 중이다.
-- **Amplitude**: 최근 도입되었으며 prod 배포가 2주 내 예정이다.
+- **Amplitude**: 최근 도입되었으며 prod 배포 전까지 dev 프로젝트로 파이프라인을 검증한다.
 - **Sentry**: 최근 연결되었으나 1차 Walking Skeleton에 포함하기엔 별도 연동 비용이 크다.
 
 Walking Skeleton 전략의 핵심 원칙은 "가장 얇은 end-to-end 경로를 먼저 완성"이다. 세 원천을 동시에 연동하면 초기 검증이 복잡해지고, GA4 연동 코드는 Amplitude 전환 완료 후 버려질 코드이므로 작성 비용이 낭비다.

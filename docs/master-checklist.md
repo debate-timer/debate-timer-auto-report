@@ -54,5 +54,8 @@
 - [x] Phase 0 산출물 문서 고정 (SRS 11.1 수정 완료)
 - [x] ADR 1건 작성 (`docs/adr/001-amplitude-first.md`)
 - [x] `.env.example`와 환경변수 키 목록 확정
+- [ ] Phase 1-1 프로젝트 기반 구성 완료
+- [ ] Phase 1-2 Amplitude 지표 1개 조회 및 스냅샷 저장 완료
+- [ ] Phase 1-3 수동/스케줄 실행 및 Discord 테스트 전송 완료
 
 상세 작업은 [current-phase-checklist.md](./current-phase-checklist.md)를 기준으로 본다.

@@ -124,6 +124,22 @@
 
 ---
 
+## 자동 리포트 MVP 매핑
+
+자동 리포트 시스템은 대시보드 전체를 처음부터 모두 분석하지 않는다. Phase 1에서는 아래 이벤트와 지표를 우선 기준으로 삼는다.
+
+| 우선순위 | metric key | Amplitude 이벤트/퍼널 | 기본 집계 | 비고 |
+|---|---|---|---|---|
+| 1 | `timer_started` | `timer_started` | Event count | Phase 1-1 seed 기준 지표 |
+| 2 | `debate_completion_rate` | `timer_started` → `debate_completed` | Funnel conversion rate | `sampleSize`는 `timer_started` 수 |
+| 3 | `debate_abandoned` | `debate_abandoned` | Event count 또는 abandon rate | `abandon_type`은 표본 충분 시 보조 세그먼트 |
+| 4 | `template_usage_rate` | `template_selected` → `template_used` | Funnel conversion rate | 템플릿별 세그먼트는 후속 확장 |
+| 5 | `table_shared` / `share_link_entered` | `table_shared`, `share_link_entered` | Event count | 확산 보조 지표 |
+
+처음에는 전체값(`segmentKey = "ALL"`, `segmentValue = "ALL"`)만 안정화하고, member/guest·템플릿·이탈 유형 세그먼트는 표본이 충분할 때 추가한다.
+
+---
+
 ## E1. 회원/비회원 활성 사용자 비율
 
 ### 지표 정의
@@ -294,8 +310,11 @@
 
 예시 값:
 - `landing_header`: 랜딩 페이지 헤더의 로그인 버튼
-- `timer_save_prompt`: 타이머에서 저장 유도로 로그인
-- `share_prompt`: 공유 기능 사용 시 로그인 유도
+- `landing_table_section`: 랜딩 페이지 시간표 섹션의 로그인 유도 버튼
+- `timer_modal`: 타이머 페이지 내 저장 유도 모달의 로그인 버튼
+- `share_save`: 공유받은 시간표 저장 시 로그인 유도
+- `protected_route`: 로그인 필요 페이지 접근 시 자동 리다이렉트
+- `unknown`: 그 외 미분류 경로
 
 **핵심 질문**: 어느 상황에서 로그인 전환이 가장 많이 일어나는가?
 

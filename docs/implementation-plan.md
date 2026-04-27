@@ -11,6 +11,12 @@
 - 단, 초기 구조부터 **Amplitude 전용 하드코딩**이 아니라 **추후 Sentry 및 다른 소스 확장**이 가능한 방식으로 설계한다.
 - AI는 초기 핵심이 아니라, **결정론적 분석 파이프라인** 위에 얹는 보조 계층으로 도입한다.
 
+현재 세부 실행은 Phase 1을 더 작게 나누어 진행한다.
+
+- **Phase 1-1**: 프로젝트 기반 구성 (`specs/feat/006-project-base-setup/`)
+- **Phase 1-2**: Amplitude 지표 1개 조회 및 스냅샷 저장
+- **Phase 1-3**: 수동/스케줄 실행과 Discord 테스트 전송
+
 ---
 
 ## 2. 구현 목표 요약
@@ -230,11 +236,12 @@ src/
 - `name`
 - `source`
 - `query_spec`
+- `query_spec_version`
 - `unit`
 - `direction`
 - `min_sample_size`
 - `warning_rule`
-- `enabled`
+- `is_active`
 - `created_at`
 - `updated_at`
 
@@ -244,12 +251,14 @@ src/
 - `metric_definition_id`
 - `source`
 - `period_type`
+- `period_key`
 - `period_start`
 - `period_end`
 - `segment_key`
 - `segment_value`
 - `value`
 - `sample_size`
+- `query_spec_version`
 - `raw_ref`
 - `collected_at`
 
@@ -260,16 +269,18 @@ src/
 - `target_period_key`
 - `status`
 - `started_at`
-- `finished_at`
+- `completed_at`
 - `trigger_type`
 - `error_summary`
 - `report_version`
 - `idempotency_key`
+- `created_at`
+- `updated_at`
 
 #### `deliveries`
 
 - `id`
-- `run_id`
+- `report_run_id`
 - `channel_type`
 - `channel_target`
 - `status`
@@ -277,8 +288,23 @@ src/
 - `sent_at`
 - `response_ref`
 - `error_summary`
+- `created_at`
+- `updated_at`
 
-#### `alerts`
+#### `report_outputs` (Phase 2 이후 추가 권장)
+
+- `id`
+- `report_run_id`
+- `report_type`
+- `target_period_key`
+- `format`
+- `payload`
+- `content_hash`
+- `created_at`
+
+`report_outputs`는 실제 전송한 리포트 본문 또는 Discord payload를 재조회·감사·재전송할 수 있게 하는 테이블이다. Phase 1-1에는 포함하지 않지만, 수동 재실행과 과거 리포트 조회를 구현하기 전에는 추가를 검토한다.
+
+#### `alerts` (Phase 2 이후 추가)
 
 - `id`
 - `metric_key`
@@ -288,6 +314,8 @@ src/
 - `reason_code`
 - `idempotency_key`
 - `created_at`
+
+Phase 1-1의 실제 Prisma 스키마 범위는 `metric_definitions`, `metric_snapshots`, `report_runs`, `deliveries` 4개 테이블과 `timer_started` seed로 제한한다. 상세 필드, enum, JSON 형식은 `specs/feat/006-project-base-setup/data-model.md`를 우선 기준으로 본다.
 
 ### 6.2 2차 확장 테이블
 
@@ -313,7 +341,7 @@ src/
 #### `ai_usage_logs`
 
 - `id`
-- `run_id`
+- `report_run_id`
 - `prompt_version_id`
 - `provider`
 - `model`
@@ -327,7 +355,7 @@ src/
 #### `ai_tool_calls`
 
 - `id`
-- `run_id`
+- `report_run_id`
 - `tool_name`
 - `step_index`
 - `arguments_json`
@@ -348,7 +376,7 @@ src/
 #### `report_evaluations`
 
 - `id`
-- `run_id`
+- `report_run_id`
 - `prompt_version_id`
 - `evaluator_type`
 - `score`
@@ -399,7 +427,11 @@ src/
 
 #### 작업 항목
 
-- NestJS 프로젝트 초기화
+Phase 1은 다음 세부 단위로 진행한다.
+
+##### Phase 1-1. 프로젝트 기반 구성
+
+- NestJS 프로젝트 초기화 확인
 - ConfigModule 적용
 - Prisma 초기화 및 DB 연결
 - Pino 로깅 적용
@@ -410,8 +442,15 @@ src/
 - `report_runs`
 - `deliveries`
 - 핵심 지표 1개 seed 등록
+
+##### Phase 1-2. Amplitude 지표 1개 수집
+
 - `MetricSourceAdapter` 인터페이스 최소 정의
 - `AmplitudeMetricSourceAdapter` 1개 지표 조회 구현
+- `timer_started` 조회 결과를 `metric_snapshots`에 저장
+
+##### Phase 1-3. 실행 및 전송 경로
+
 - 수동 실행 API 또는 내부 실행 entrypoint 구현
 - 단순 리포트 payload 생성
 - Discord Webhook 테스트 전송 구현
@@ -1195,10 +1234,9 @@ AI 계층은 “잘 말하는 것”보다 “틀리지 않는 것”이 우선�
 
 ## 15. 다음 액션
 
-문서 작성 이후 바로 착수할 작업은 아래 순서가 적절하다.
+현재 시점의 바로 다음 작업은 Phase 1-1 문서(`specs/feat/006-project-base-setup/`)를 기준으로 진행한다.
 
-1. `ADR: Amplitude-first architecture` 작성
-2. NestJS 프로젝트 초기화
-3. Walking Skeleton에 필요한 최소 Prisma schema 초안 작성
-4. 지표 1개 기준 `AmplitudeMetricSourceAdapter` 구현
-5. 수동 실행 -> 저장 -> Discord 전송 경로 완성
+1. Phase 1-1 프로젝트 기반 구성 완료
+2. Phase 1-2 Amplitude 지표 1개 조회 및 스냅샷 저장 spec 작성
+3. Phase 1-3 수동/스케줄 실행 -> 저장 -> Discord 전송 spec 작성
+4. 같은 실행 경로에 멱등성, 재시도, 관측성을 단계적으로 추가
