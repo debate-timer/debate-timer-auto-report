@@ -5,8 +5,9 @@
 현재 원칙은 다음과 같다.
 
 - 문서는 모두 `docs/` 아래에서 관리한다.
-- 현재 활성 Phase는 `Phase 0. 설계 고정`이다.
-- 이번 단계에서는 문서만 정리하며, Walking Skeleton 구현과 Nest CLI 실행은 하지 않는다.
+- 현재 활성 Phase는 `Phase 1. Walking Skeleton`이다.
+- 현재 세부 실행 단위는 `specs/feat/006-project-base-setup/`의 **Phase 1-1 프로젝트 기반 구성**이다.
+- 전역 설계는 `docs/`, 기능별 실행 명세는 `specs/`에서 관리한다.
 
 ## 핵심 문서
 
@@ -15,6 +16,7 @@
 - [tech-stack.md](./tech-stack.md): 기술 스택 결정 및 운영 유의사항
 - [ai-framework-selection.md](./ai-framework-selection.md): AI 프레임워크 비교와 선택 근거
 - [analytics-dashboard.md](./analytics-dashboard.md): Amplitude 대시보드 해석 가이드
+- [learning-and-portfolio.md](./learning-and-portfolio.md): 학습 및 이력서/포트폴리오 산출물 운영 기준
 
 ## 전역 관리 문서
 
@@ -24,11 +26,12 @@
 
 ## 현재 작업 기준
 
-문서 착수 순서는 아래를 기준으로 본다.
+문서와 구현 착수 순서는 아래를 기준으로 본다.
 
 1. [metrics-reporting-srs.md](./metrics-reporting-srs.md)
 2. [tech-stack.md](./tech-stack.md)
 3. [implementation-plan.md](./implementation-plan.md)
 4. [current-phase-checklist.md](./current-phase-checklist.md)
+5. `../specs/feat/006-project-base-setup/`
 
-현재는 문서 구조를 안정화하는 단계이며, 코드 작업은 명시적 지시 이후에만 진행한다.
+Phase 1-1의 구현 세부사항은 `specs/feat/006-project-base-setup/`를 우선 기준으로 보고, 전역 문서와 충돌이 발견되면 승인 후 전역 문서를 함께 정리한다.

@@ -12,6 +12,8 @@
 | Runtime | Node.js | 최신 LTS |
 | Language | TypeScript | 최신 LTS |
 | Framework | NestJS | 최신 안정 버전 |
+| Database | PostgreSQL | 로컬 개발 및 운영 기본 DB |
+| ORM | Prisma 7 | `prisma-client` generator + PostgreSQL driver adapter |
 | 내부 스케줄러 | `@nestjs/schedule` | — |
 | AI 통합 레이어 | AI SDK Core | 최신 안정 버전 |
 | AI 출력 스키마 | Zod | 최신 안정 버전 |
@@ -32,12 +34,10 @@
 
 | 항목 | 후보 | 현재 가이드 |
 |---|---|---|
-| Database | PostgreSQL / SQLite | PostgreSQL 권장 (이력서 어필 + TypeORM/Prisma 경험) |
-| ORM | Prisma / TypeORM | Prisma 권장 (타입 안전성, 최신 DX) |
 | AI 제공자 | Gemini API / Anthropic API / OpenAI API | **Gemini API 무료 티어**로 시작 → 한도 초과 시 유료 전환 |
 | AI 분석 패턴 | 단순 요약 / 제한형 분석 패턴(Bounded tool calling) / 자율형 agent | **제한형 분석 패턴(Bounded tool calling)** 권장. 앱이 먼저 후보를 좁히고, AI는 허용된 소수의 읽기 전용 도구만 호출 |
 | 로깅 | Nest built-in Logger / Pino / Winston | Pino 권장 (구조화 로그, request context, 운영 확장성) |
-| 검증 | class-validator + class-transformer | NestJS 표준 조합 |
+| 환경변수 검증 | Joi / Zod / class-validator | Phase 1-1은 `@nestjs/config`와 직접 결합되는 Joi 사용. DTO 검증은 class-validator + class-transformer 사용 |
 | API 문서 | Swagger (`@nestjs/swagger`) | 수동 실행 API 용도로 필수 |
 | 테스트 | Jest (NestJS 기본) | 유닛 + E2E 각 1~2개 |
 | CI | GitHub Actions | lint + test만 돌림 (배포는 수동 또는 별도) |
@@ -74,7 +74,7 @@
 - GA4 통합 코드는 Amplitude 전환 후 버려짐 → 낭비.
 - Amplitude Dashboard/Export API가 GA4 Data API보다 제품 이벤트 다루기 단순.
 - "신규 수집" 상태 처리는 SRS 6.4.1에 이미 포함.
-- **비용**: 현재 Amplitude는 prod 미배포 상태 (dev만). 2주 내 prod 배포 예정.
+- **비용**: Amplitude prod 배포 전까지는 dev 프로젝트와 테스트 Discord 채널로 파이프라인을 검증한다.
 
 ### 3.4 `@nestjs/schedule` (내장 스케줄러)
 
@@ -87,7 +87,16 @@
 - 본 프로젝트 팀 커뮤니케이션 채널이 Discord.
 - Webhook 방식은 봇 등록·OAuth 불필요, 단순 POST로 전송 가능.
 
-### 3.6 제한형 분석 패턴 (Bounded tool calling)
+### 3.6 PostgreSQL + Prisma 7
+
+- DB는 PostgreSQL로 확정한다.
+- ORM은 Prisma 7로 확정한다.
+- Prisma 7에서는 datasource URL을 `schema.prisma`의 `datasource` 블록에 두지 않고 `prisma.config.ts`에서 관리한다.
+- 신규 스키마는 `prisma-client` generator와 명시적 `output` 경로를 사용한다.
+- PostgreSQL 연결은 `@prisma/adapter-pg`의 `PrismaPg` driver adapter를 사용한다.
+- Phase 1-1 기준 생성 경로는 `src/generated/prisma`를 권장한다.
+
+### 3.7 제한형 분석 패턴 (Bounded tool calling)
 
 - 본 프로젝트는 **지표/에러 데이터를 읽고, 제한된 도구를 사용해 원인 가설과 액션을 제시하는 AI 분석 시스템**을 목표로 한다.
 - 초기 목표는 **완전 자율형 agent**가 아니라, **조건부 read-only tool loop를 가진 bounded analyzer agent**다.
@@ -104,7 +113,7 @@
 - 이 방식은 AI agent 역량을 보여주면서도 비용, 호출 수, 실행 시간, 실패 처리, 멱등성을 예측 가능하게 만든다.
 - 자율형 agent 확장은 2차 고도화 후보로 남기되, MVP 범위에는 포함하지 않는다.
 
-### 3.7 AI SDK Core
+### 3.8 AI SDK Core
 
 - 본 프로젝트의 AI 계층 구현에는 **AI SDK Core**를 사용한다.
 - 이유는 다음과 같다.
@@ -114,7 +123,7 @@
 - 즉, **시스템 orchestration은 NestJS use case가 담당**하고, **AI는 분석 단계 내부에서 bounded tool loop를 제한적으로 orchestration**한다.
 - AI SDK Core는 이 경계 안에서 **모델 호출 + structured output + bounded tool calling** 계층으로 사용한다.
 
-### 3.8 AI 품질 운영 방식
+### 3.9 AI 품질 운영 방식
 
 - AI 기능은 단순 프롬프트 호출이 아니라 **운영 가능한 분석 계층**으로 관리한다.
 - 이를 위해 다음을 설계 범위에 포함한다.
@@ -123,7 +132,7 @@
   - **숫자 일치 검증**: AI 출력에 등장한 핵심 수치가 원본 계산 결과와 일치하는지 확인
 - 이 세 가지가 있어야 본 프로젝트를 단순 LLM 요약이 아니라 AX/AI agent 지향 시스템으로 설명할 수 있다.
 
-### 3.9 AI 프레임워크 비교 및 선택
+### 3.10 AI 프레임워크 비교 및 선택
 
 2026-04-19 기준으로, 본 프로젝트에서 검토한 주요 AI 프레임워크/SDK는 다음과 같다.
 
@@ -148,7 +157,7 @@
 
 더 자세한 비교와 선택 근거는 [ai-framework-selection.md](ai-framework-selection.md)를 참조한다.
 
-### 3.10 로깅: Nest built-in Logger vs Pino
+### 3.11 로깅: Nest built-in Logger vs Pino
 
 현재 단계에서 로깅 후보는 크게 세 가지다.
 
@@ -224,8 +233,7 @@
 
 ### 4.3 데이터 원천 과도기
 
-- 현재: GA4 (prod), Amplitude/Sentry (dev only).
-- 2주 내 Amplitude/Sentry prod 배포 예정.
+- 현재 전환 전략: GA4 연동 코드는 작성하지 않고, Amplitude prod 배포 전까지 dev 프로젝트로 파이프라인을 검증한다.
 - 본 프로젝트는 **Amplitude 단독 구조로 설계**, GA4 통합은 미구현.
 - prod 배포 이전 기간: **dev Amplitude/Sentry 프로젝트 + 테스트 Discord 채널**로 파이프라인 검증.
 - prod 배포 시점: **환경변수만 스왑** (`.env.dev` → `.env.prod`).
@@ -372,14 +380,12 @@ config/
 2. **AI 월 예산 상한** 금액
 3. **MVP 지표 목록** (Amplitude에서 어떤 이벤트 기준?)
 4. **민감정보 마스킹 규칙 초기 세트**
-5. **DB 선택**: Postgres vs SQLite (Postgres 권장 입장)
-6. **ORM 선택**: Prisma vs TypeORM (Prisma 권장 입장)
-7. **제한형 분석 패턴 상세 설계**: 허용 tool 목록, 호출 상한, 스키마, fallback 조건을 어디까지 둘 것인가?
-8. **도메인 + HTTPS 인증서**: 무료 도메인(Duck DNS 등) vs 실제 구매
-9. **백업 전략**: Postgres 덤프를 어디에 보관? (로컬 S3 호환 / Backblaze B2 무료 10GB 등)
-10. **CI/CD 범위**: GitHub Actions에서 어디까지 자동화?
-11. **AI eval 운영 기준**: 골든셋 규모, judge 프롬프트, 합격 컷라인을 어디까지 둘 것인가?
-12. **prompt versioning 운영 규칙**: 롤백 방식, A/B 여부, 비활성 버전 보관 정책
+5. **제한형 분석 패턴 상세 설계**: 허용 tool 목록, 호출 상한, 스키마, fallback 조건을 어디까지 둘 것인가?
+6. **도메인 + HTTPS 인증서**: 무료 도메인(Duck DNS 등) vs 실제 구매
+7. **백업 전략**: Postgres 덤프를 어디에 보관? (로컬 S3 호환 / Backblaze B2 무료 10GB 등)
+8. **CI/CD 범위**: GitHub Actions에서 어디까지 자동화?
+9. **AI eval 운영 기준**: 골든셋 규모, judge 프롬프트, 합격 컷라인을 어디까지 둘 것인가?
+10. **prompt versioning 운영 규칙**: 롤백 방식, A/B 여부, 비활성 버전 보관 정책
 
 ---
 
