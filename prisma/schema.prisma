@@ -1,0 +1,147 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model MetricDefinition {
+  id               String       @id @default(cuid())
+  key              String       @unique
+  name             String
+  description      String?
+  source           MetricSource @default(AMPLITUDE)
+  unit             MetricUnit   @default(COUNT)
+  querySpec        Json         @map("query_spec")
+  querySpecVersion Int          @default(1) @map("query_spec_version")
+  direction        Direction
+  minSampleSize    Int          @default(30) @map("min_sample_size")
+  warningRule      Json?        @map("warning_rule")
+  isActive         Boolean      @default(true) @map("is_active")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  snapshots MetricSnapshot[]
+
+  @@map("metric_definitions")
+}
+
+model MetricSnapshot {
+  id                 String       @id @default(cuid())
+  metricDefinitionId String       @map("metric_definition_id")
+  source             MetricSource @default(AMPLITUDE)
+  periodType         PeriodType   @map("period_type")
+  periodKey          String       @map("period_key")
+  periodStart        DateTime     @map("period_start")
+  periodEnd          DateTime     @map("period_end")
+  segmentKey         String       @default("ALL") @map("segment_key")
+  segmentValue       String       @default("ALL") @map("segment_value")
+  value              Decimal      @db.Decimal(20, 6)
+  sampleSize         Int          @map("sample_size")
+  querySpecVersion   Int          @map("query_spec_version")
+  rawRef             Json?        @map("raw_ref")
+  collectedAt        DateTime     @default(now()) @map("collected_at")
+
+  definition MetricDefinition @relation(fields: [metricDefinitionId], references: [id], onDelete: Restrict)
+
+  @@unique([metricDefinitionId, periodType, periodKey, segmentKey, segmentValue])
+  @@index([periodType, periodKey])
+  @@index([source])
+  @@map("metric_snapshots")
+}
+
+model ReportRun {
+  id              String      @id @default(cuid())
+  runType         RunType     @map("run_type")
+  targetPeriodKey String      @map("target_period_key")
+  reportVersion   Int         @default(1) @map("report_version")
+  idempotencyKey  String      @unique @map("idempotency_key")
+  status          RunStatus   @default(PENDING)
+  triggerType     TriggerType @map("trigger_type")
+  startedAt       DateTime?   @map("started_at")
+  completedAt     DateTime?   @map("completed_at")
+  errorSummary    String?     @map("error_summary")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  deliveries Delivery[]
+
+  @@unique([runType, targetPeriodKey, reportVersion])
+  @@index([status])
+  @@map("report_runs")
+}
+
+model Delivery {
+  id            String          @id @default(cuid())
+  reportRunId   String          @map("report_run_id")
+  channelType   DeliveryChannel @map("channel_type")
+  channelTarget String          @map("channel_target")
+  status        DeliveryStatus  @default(PENDING)
+  attemptCount  Int             @default(0) @map("attempt_count")
+  sentAt        DateTime?       @map("sent_at")
+  responseRef   Json?           @map("response_ref")
+  errorSummary  String?         @map("error_summary")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  reportRun ReportRun @relation(fields: [reportRunId], references: [id], onDelete: Restrict)
+
+  @@index([reportRunId])
+  @@index([status])
+  @@map("deliveries")
+}
+
+enum MetricSource {
+  AMPLITUDE
+}
+
+enum MetricUnit {
+  COUNT
+  RATIO
+  PERCENT
+  MILLISECONDS
+}
+
+enum Direction {
+  HIGHER_IS_BETTER
+  LOWER_IS_BETTER
+}
+
+enum PeriodType {
+  WEEKLY
+  MONTHLY
+}
+
+enum RunType {
+  WEEKLY_REPORT
+  MONTHLY_REPORT
+  ALERT
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum TriggerType {
+  SCHEDULE
+  MANUAL
+}
+
+enum DeliveryChannel {
+  TEST
+  REPORT
+  ALERT
+  OPS
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+}
