@@ -4,7 +4,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from './modules/config/config.module';
 import { HealthModule } from './modules/health/health.module';
+import { MetricSourcesModule } from './modules/metric-sources/metric-sources.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
+import { SnapshotsModule } from './modules/snapshots/snapshots.module';
 
 @Module({
   imports: [
@@ -20,7 +22,9 @@ import { PrismaModule } from './modules/prisma/prisma.module';
       },
     }),
     HealthModule,
+    MetricSourcesModule,
     PrismaModule,
+    SnapshotsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
