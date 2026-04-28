@@ -17,6 +17,7 @@
 - [ai-framework-selection.md](./ai-framework-selection.md): AI 프레임워크 비교와 선택 근거
 - [analytics-dashboard.md](./analytics-dashboard.md): Amplitude 대시보드 해석 가이드
 - [learning-and-portfolio.md](./learning-and-portfolio.md): 학습 및 이력서/포트폴리오 산출물 운영 기준
+- [learning/](./learning/): 학습 아카이브
 
 ## 전역 관리 문서
 
