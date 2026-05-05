@@ -153,6 +153,36 @@ describe('AmplitudeMetricSourceAdapter', () => {
     });
   });
 
+  test('seriesCollapsed 구조가 배열이 아니면 실패 처리한다', async () => {
+    const client = createClientMock({
+      body: { data: { seriesCollapsed: 'not-an-array' } },
+      rawRef,
+    } as unknown as AmplitudeSegmentationResult);
+    const adapter = new AmplitudeMetricSourceAdapter(client);
+
+    const result = await adapter.collect(definition, period);
+
+    expect(result).toMatchObject({
+      status: 'failed',
+      reasonCode: 'AMPLITUDE_RESPONSE_INVALID',
+    });
+  });
+
+  test('seriesCollapsed 내부 series 구조가 배열이 아니면 실패 처리한다', async () => {
+    const client = createClientMock({
+      body: { data: { seriesCollapsed: [{ value: 12 }] } },
+      rawRef,
+    } as unknown as AmplitudeSegmentationResult);
+    const adapter = new AmplitudeMetricSourceAdapter(client);
+
+    const result = await adapter.collect(definition, period);
+
+    expect(result).toMatchObject({
+      status: 'failed',
+      reasonCode: 'AMPLITUDE_RESPONSE_INVALID',
+    });
+  });
+
   test('Amplitude API 오류는 지표 실패 결과로 변환한다', async () => {
     const client = createRejectingClientMock(
       Object.assign(new Error('Amplitude API request failed with status 429'), {

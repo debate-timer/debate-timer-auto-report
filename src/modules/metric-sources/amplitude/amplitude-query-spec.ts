@@ -31,7 +31,19 @@ export function parseAmplitudeEventCountQuerySpec(
     throw new Error('Unsupported Amplitude querySpec');
   }
 
+  const allowedKeys = new Set([
+    'version',
+    'source',
+    'kind',
+    'eventType',
+    'aggregation',
+    'filters',
+    'groupBy',
+  ]);
+  const querySpecKeys = Object.keys(querySpec);
   const isSupported =
+    querySpecKeys.length === allowedKeys.size &&
+    querySpecKeys.every((key) => allowedKeys.has(key)) &&
     querySpec.version === 1 &&
     querySpec.source === 'AMPLITUDE' &&
     querySpec.kind === 'EVENT_COUNT' &&

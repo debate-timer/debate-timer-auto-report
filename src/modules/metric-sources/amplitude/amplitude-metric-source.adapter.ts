@@ -132,13 +132,25 @@ function extractEventCount(body: {
 }): { isValid: true; value: number } | { isValid: false } {
   const seriesCollapsed = body.data?.seriesCollapsed;
 
-  if (!isUnknownArray(seriesCollapsed) || seriesCollapsed.length === 0) {
+  if (seriesCollapsed === undefined) {
+    return { isValid: true, value: 0 };
+  }
+
+  if (!isUnknownArray(seriesCollapsed)) {
+    return { isValid: false };
+  }
+
+  if (seriesCollapsed.length === 0) {
     return { isValid: true, value: 0 };
   }
 
   const firstSeries = seriesCollapsed[0];
 
-  if (!isUnknownArray(firstSeries) || firstSeries.length === 0) {
+  if (!isUnknownArray(firstSeries)) {
+    return { isValid: false };
+  }
+
+  if (firstSeries.length === 0) {
     return { isValid: true, value: 0 };
   }
 

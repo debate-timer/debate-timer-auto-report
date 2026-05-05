@@ -57,4 +57,22 @@ describe('Amplitude querySpec 검증', () => {
       }),
     ).toThrow('Unsupported Amplitude querySpec');
   });
+
+  test('timer_started가 아닌 eventType은 거부한다', () => {
+    expect(() =>
+      parseAmplitudeEventCountQuerySpec({
+        ...validQuerySpec,
+        eventType: 'timer_ended',
+      }),
+    ).toThrow('Unsupported Amplitude querySpec');
+  });
+
+  test('허용되지 않은 추가 필드가 있으면 거부한다', () => {
+    expect(() =>
+      parseAmplitudeEventCountQuerySpec({
+        ...validQuerySpec,
+        unexpectedField: 'should-not-pass',
+      }),
+    ).toThrow('Unsupported Amplitude querySpec');
+  });
 });

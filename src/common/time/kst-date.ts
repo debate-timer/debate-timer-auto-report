@@ -1,6 +1,12 @@
 const KST_OFFSET_MILLISECONDS = 9 * 60 * 60 * 1000;
 const ONE_MILLISECOND = 1;
 
+function assertValidDate(value: Date, label: string): void {
+  if (Number.isNaN(value.getTime())) {
+    throw new RangeError(`${label} must be a valid Date`);
+  }
+}
+
 /**
  * UTC Date를 KST 기준 YYYYMMDD 문자열로 바꿉니다.
  *
@@ -8,6 +14,7 @@ const ONE_MILLISECOND = 1;
  * Amplitude에 넘길 날짜 문자열은 "20260420"입니다.
  */
 export function formatKstDate(date: Date): string {
+  assertValidDate(date, 'formatKstDate date');
   const kstDate = new Date(date.getTime() + KST_OFFSET_MILLISECONDS);
   const year = kstDate.getUTCFullYear();
   const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
@@ -23,5 +30,9 @@ export function formatKstDate(date: Date): string {
 export function formatAmplitudeEndDateFromExclusiveEnd(
   periodEnd: Date,
 ): string {
+  assertValidDate(
+    periodEnd,
+    'formatAmplitudeEndDateFromExclusiveEnd periodEnd',
+  );
   return formatKstDate(new Date(periodEnd.getTime() - ONE_MILLISECOND));
 }

@@ -23,4 +23,15 @@ describe('KST 날짜 포맷', () => {
     expect(formatKstDate(periodStart)).toBe('20260105');
     expect(formatAmplitudeEndDateFromExclusiveEnd(periodEnd)).toBe('20260111');
   });
+
+  test('유효하지 않은 Date는 즉시 거부한다', () => {
+    const invalidDate = new Date('not-a-date');
+
+    expect(() => formatKstDate(invalidDate)).toThrow(
+      'formatKstDate date must be a valid Date',
+    );
+    expect(() => formatAmplitudeEndDateFromExclusiveEnd(invalidDate)).toThrow(
+      'formatAmplitudeEndDateFromExclusiveEnd periodEnd must be a valid Date',
+    );
+  });
 });

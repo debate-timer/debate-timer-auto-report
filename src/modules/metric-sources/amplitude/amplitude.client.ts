@@ -9,6 +9,8 @@ export const AMPLITUDE_FETCH = Symbol('AMPLITUDE_FETCH');
 /** Node.js fetch와 같은 호출 시그니처를 가진 HTTP 함수 타입입니다. */
 export type AmplitudeFetch = typeof fetch;
 
+const AMPLITUDE_REQUEST_TIMEOUT_MILLISECONDS = 15_000;
+
 /** Amplitude Event Segmentation API에 전달할 요청 파라미터입니다. */
 export type FetchEventSegmentationParams = {
   /** 조회할 Amplitude 이벤트 타입입니다. */
@@ -92,15 +94,30 @@ export class AmplitudeClient {
     let response: Response;
 
     try {
-      response = await this.amplitudeFetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          Authorization: `Basic ${Buffer.from(
-            `${apiKey}:${secretKey}`,
-          ).toString('base64')}`,
-        },
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(
+        () => controller.abort(),
+        AMPLITUDE_REQUEST_TIMEOUT_MILLISECONDS,
+      );
+
+      try {
+        response = await this.amplitudeFetch(url.toString(), {
+          method: 'GET',
+          signal: controller.signal,
+          headers: {
+            Authorization: `Basic ${Buffer.from(
+              `${apiKey}:${secretKey}`,
+            ).toString('base64')}`,
+          },
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
     } catch (error) {
+      if (isAbortError(error)) {
+        throw new AmplitudeApiError('Amplitude API request timed out');
+      }
+
       // 네트워크 예외 메시지에 credential이나 webhook URL이 섞일 수 있으므로
       // 안전한 문자열로 정리한 뒤 우리 도메인 error로 감쌉니다.
       throw new AmplitudeApiError(
@@ -120,8 +137,20 @@ export class AmplitudeClient {
       );
     }
 
-    const body = (await response.json()) as AmplitudeSegmentationResponse;
-    const responseBodyText = JSON.stringify(body);
+    const responseBodyText = await response.text();
+    let body: AmplitudeSegmentationResponse;
+
+    try {
+      body = JSON.parse(responseBodyText) as AmplitudeSegmentationResponse;
+    } catch {
+      const requestId = response.headers.get('x-amplitude-request-id');
+      const requestContext = requestId ? ` (requestId: ${requestId})` : '';
+
+      throw new AmplitudeApiError(
+        `Amplitude API returned invalid JSON${requestContext}`,
+        response.status,
+      );
+    }
 
     return {
       body,
@@ -145,6 +174,15 @@ function getErrorMessage(error: unknown): string {
   }
 
   return 'unknown error';
+}
+
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    error.name === 'AbortError'
+  );
 }
 
 /**
