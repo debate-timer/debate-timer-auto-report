@@ -16,4 +16,7 @@ coverage/
 skills-lock.json
 AGENTS.md
 CLAUDE.md
-specs/
+specs/**/*.local.*
+specs/**/*.tmp
+specs/**/*.bak
+specs/**/*.swp
