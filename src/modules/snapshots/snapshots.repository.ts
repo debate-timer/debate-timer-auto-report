@@ -47,9 +47,18 @@ export class SnapshotsRepository {
 
 /** rawRef 전체를 검사해 credential 계열 key가 있으면 저장을 중단합니다. */
 function assertRawRefDoesNotContainSensitiveKeys(value: unknown): void {
-  const sensitiveKeys = new Set(['apikey', 'secretkey', 'authorization']);
+  const sensitiveKeys = new Set([
+    'apikey',
+    'secretkey',
+    'authorization',
+    'accesstoken',
+    'refreshtoken',
+    'password',
+    'clientsecret',
+  ]);
+  const sensitiveKeyFragments = ['token', 'secret', 'password', 'auth', 'cred'];
 
-  if (!containsSensitiveKey(value, sensitiveKeys)) {
+  if (!containsSensitiveKey(value, sensitiveKeys, sensitiveKeyFragments)) {
     return;
   }
 
@@ -63,9 +72,12 @@ function assertRawRefDoesNotContainSensitiveKeys(value: unknown): void {
 function containsSensitiveKey(
   value: unknown,
   sensitiveKeys: Set<string>,
+  sensitiveKeyFragments: string[],
 ): boolean {
   if (Array.isArray(value)) {
-    return value.some((item) => containsSensitiveKey(item, sensitiveKeys));
+    return value.some((item) =>
+      containsSensitiveKey(item, sensitiveKeys, sensitiveKeyFragments),
+    );
   }
 
   if (typeof value !== 'object' || value === null) {
@@ -73,10 +85,23 @@ function containsSensitiveKey(
   }
 
   return Object.entries(value).some(([key, nestedValue]) => {
-    if (sensitiveKeys.has(key.toLowerCase())) {
+    const normalizedKey = normalizeKey(key);
+
+    if (
+      sensitiveKeys.has(normalizedKey) ||
+      sensitiveKeyFragments.some((fragment) => normalizedKey.includes(fragment))
+    ) {
       return true;
     }
 
-    return containsSensitiveKey(nestedValue, sensitiveKeys);
+    return containsSensitiveKey(
+      nestedValue,
+      sensitiveKeys,
+      sensitiveKeyFragments,
+    );
   });
+}
+
+function normalizeKey(key: string): string {
+  return key.toLowerCase().replace(/[^a-z0-9]/g, '');
 }

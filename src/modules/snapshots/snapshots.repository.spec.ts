@@ -155,4 +155,25 @@ describe('SnapshotsRepository', () => {
     ).rejects.toThrow('rawRef contains sensitive data');
     expect(upsertMock).not.toHaveBeenCalled();
   });
+
+  test('rawRef 민감정보 key 변형도 저장 전에 실패한다', async () => {
+    const { repository, upsertMock } = createRepository();
+    const unsafeResult: MetricCollectionSuccess = {
+      ...successResult,
+      rawRef: {
+        ...successResult.rawRef,
+        nested: {
+          api_key: 'real-api-key',
+          accessToken: 'real-token',
+          'refresh-token': 'real-refresh-token',
+          password: 'real-password',
+        },
+      } as unknown as MetricCollectionSuccess['rawRef'],
+    };
+
+    await expect(
+      repository.upsertCollectionSuccess(unsafeResult),
+    ).rejects.toThrow('rawRef contains sensitive data');
+    expect(upsertMock).not.toHaveBeenCalled();
+  });
 });
