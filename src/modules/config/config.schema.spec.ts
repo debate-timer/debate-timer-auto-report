@@ -9,6 +9,7 @@ describe('ConfigSchema', () => {
 
   const validEnv = {
     NODE_ENV: 'development',
+    TZ: 'Asia/Seoul',
     PORT: '3000',
     DATABASE_URL: 'postgresql://user:pass@localhost:5432/debate_timer',
     AMPLITUDE_API_KEY: 'amplitude-api-key',
@@ -84,6 +85,26 @@ describe('ConfigSchema', () => {
   });
 
   describe('애플리케이션 기본 환경변수 검증', () => {
+    test('TZ가 Asia/Seoul이면 검증에 성공한다', () => {
+      const { error } = validate({ TZ: 'Asia/Seoul' });
+
+      expect(error).toBeUndefined();
+    });
+
+    test('TZ가 없으면 검증에 실패한다', () => {
+      const { error } = validate({ TZ: undefined });
+
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('TZ');
+    });
+
+    test('TZ가 Asia/Seoul이 아니면 검증에 실패한다', () => {
+      const { error } = validate({ TZ: 'UTC' });
+
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('TZ');
+    });
+
     test('NODE_ENV를 지정하지 않으면 기본값 development가 적용된다', () => {
       const result = validate({ NODE_ENV: undefined });
       const value = result.value as ConfigValues;

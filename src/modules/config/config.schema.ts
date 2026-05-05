@@ -4,6 +4,7 @@ export const configSchema = Joi.object({
   NODE_ENV: Joi.string()
     .valid('development', 'test', 'production')
     .default('development'),
+  TZ: Joi.string().valid('Asia/Seoul').required(),
   PORT: Joi.number().port().default(3000),
   DATABASE_URL: Joi.string()
     .uri({ scheme: ['postgresql', 'postgres'] })
